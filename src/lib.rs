@@ -97,22 +97,14 @@ where
             Empty => (),
             NonEmpty(ref mut node) => match node.balance_factor {
                 -2 => {
-                    let lf = node.left.node().unwrap().balance_factor;
+                    let lf = node.left.node().balance_factor;
                     if lf == -1 || lf == 0 {
                         let (a, b) = if lf == -1 { (0, 0) } else { (-1, 1) };
                         self.rotate_right();
-                        self.node().unwrap().right.node().unwrap().balance_factor = a;
-                        self.node().unwrap().balance_factor = b;
+                        self.node().right.node().balance_factor = a;
+                        self.node().balance_factor = b;
                     } else if lf == 1 {
-                        let (a, b) = match node
-                            .left
-                            .node()
-                            .unwrap()
-                            .right
-                            .node()
-                            .unwrap()
-                            .balance_factor
-                        {
+                        let (a, b) = match node.left.node().right.node().balance_factor {
                             -1 => (1, 0),
                             0 => (0, 0),
                             1 => (0, -1),
@@ -120,30 +112,22 @@ where
                         };
                         node.left.rotate_left();
                         self.rotate_right();
-                        self.node().unwrap().right.node().unwrap().balance_factor = a;
-                        self.node().unwrap().left.node().unwrap().balance_factor = b;
-                        self.node().unwrap().balance_factor = 0;
+                        self.node().right.node().balance_factor = a;
+                        self.node().left.node().balance_factor = b;
+                        self.node().balance_factor = 0;
                     } else {
                         unreachable!()
                     }
                 }
                 2 => {
-                    let lf = node.right.node().unwrap().balance_factor;
+                    let lf = node.right.node().balance_factor;
                     if lf == 1 || lf == 0 {
                         let (a, b) = if lf == 1 { (0, 0) } else { (1, -1) };
                         self.rotate_left();
-                        self.node().unwrap().left.node().unwrap().balance_factor = a;
-                        self.node().unwrap().balance_factor = b;
+                        self.node().left.node().balance_factor = a;
+                        self.node().balance_factor = b;
                     } else if lf == -1 {
-                        let (a, b) = match node
-                            .right
-                            .node()
-                            .unwrap()
-                            .left
-                            .node()
-                            .unwrap()
-                            .balance_factor
-                        {
+                        let (a, b) = match node.right.node().left.node().balance_factor {
                             1 => (-1, 0),
                             0 => (0, 0),
                             -1 => (0, 1),
@@ -151,9 +135,9 @@ where
                         };
                         node.right.rotate_right();
                         self.rotate_left();
-                        self.node().unwrap().left.node().unwrap().balance_factor = a;
-                        self.node().unwrap().right.node().unwrap().balance_factor = b;
-                        self.node().unwrap().balance_factor = 0;
+                        self.node().left.node().balance_factor = a;
+                        self.node().right.node().balance_factor = b;
+                        self.node().balance_factor = 0;
                     } else {
                         unreachable!()
                     }
@@ -163,10 +147,10 @@ where
         }
     }
 
-    fn node(&mut self) -> Option<&mut Node<T>> {
+    fn node(&mut self) -> &mut Node<T> {
         match *self {
-            Empty => None,
-            NonEmpty(ref mut v) => Some(v),
+            Empty => panic!("call on empty tree"),
+            NonEmpty(ref mut v) => v,
         }
     }
 
