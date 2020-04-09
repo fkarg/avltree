@@ -6,7 +6,6 @@ extern crate quickcheck;
 #[macro_use(quickcheck)]
 extern crate quickcheck_macros;
 use std::borrow::Borrow;
-use std::cmp::Ordering;
 use std::cmp::Ordering::*;
 use std::default::Default;
 use std::iter::{FromIterator, Iterator};
@@ -56,8 +55,8 @@ where
                 (true, true)
             }
             NonEmpty(ref mut node) => match node.value.cmp(&value) {
-                Ordering::Equal => (false, false),
-                Ordering::Less => {
+                Equal => (false, false),
+                Less => {
                     let (inserted, deepened) = node.right.add(value);
                     if deepened {
                         let ret = match node.balance_factor {
@@ -72,7 +71,7 @@ where
                         (inserted, deepened)
                     }
                 }
-                Ordering::Greater => {
+                Greater => {
                     let (inserted, deepened) = node.left.add(value);
                     if deepened {
                         let ret = match node.balance_factor {
