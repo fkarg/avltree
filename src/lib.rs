@@ -169,18 +169,18 @@ where
     }
 
     fn rotate_right(&mut self) {
-        let mut v = mem::take(self);
-        let mut left = mem::take(v.left());
-        let left_right = mem::take(left.right());
+        let mut v = mem::replace(self, Empty);
+        let mut left = mem::replace(v.left(), Empty);
+        let left_right = mem::replace(left.right(), Empty);
         *v.left() = left_right;
         *left.right() = v;
         *self = left;
     }
 
     fn rotate_left(&mut self) {
-        let mut v = mem::take(self);
-        let mut right = mem::take(v.right());
-        let right_left = mem::take(right.left());
+        let mut v = mem::replace(self, Empty);
+        let mut right = mem::replace(v.right(), Empty);
+        let right_left = mem::replace(right.left(), Empty);
         *v.right() = right_left;
         *right.left() = v;
         *self = right;
@@ -256,7 +256,7 @@ impl<T> IntoIter<T> {
 
     fn traverse_left(&mut self, mut tree: AVLTree<T>) {
         while let NonEmpty(mut node) = tree {
-            tree = mem::take(&mut node.left);
+            tree = mem::replace(&mut node.left, Empty);
             self.stack.push(*node);
         }
     }
@@ -269,7 +269,7 @@ impl<T> Iterator for IntoIter<T> {
             None => return None,
             Some(node) => node,
         };
-        self.traverse_left(mem::take(&mut node.right));
+        self.traverse_left(mem::replace(&mut node.right, Empty));
         Some(node.value)
     }
 }
