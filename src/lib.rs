@@ -95,22 +95,22 @@ where
     fn balance(&mut self) {
         match *self {
             Empty => (),
-            NonEmpty(ref mut node) => match node.balance_factor {
+            NonEmpty(_) => match self.node().balance_factor {
                 -2 => {
-                    let lf = node.left.node().balance_factor;
+                    let lf = self.node().left.node().balance_factor;
                     if lf == -1 || lf == 0 {
                         let (a, b) = if lf == -1 { (0, 0) } else { (-1, 1) };
                         self.rotate_right();
                         self.node().right.node().balance_factor = a;
                         self.node().balance_factor = b;
                     } else if lf == 1 {
-                        let (a, b) = match node.left.node().right.node().balance_factor {
+                        let (a, b) = match self.node().left.node().right.node().balance_factor {
                             -1 => (1, 0),
                             0 => (0, 0),
                             1 => (0, -1),
                             _ => unreachable!(),
                         };
-                        node.left.rotate_left();
+                        self.node().left.rotate_left();
                         self.rotate_right();
                         self.node().right.node().balance_factor = a;
                         self.node().left.node().balance_factor = b;
@@ -120,20 +120,20 @@ where
                     }
                 }
                 2 => {
-                    let lf = node.right.node().balance_factor;
+                    let lf = self.node().right.node().balance_factor;
                     if lf == 1 || lf == 0 {
                         let (a, b) = if lf == 1 { (0, 0) } else { (1, -1) };
                         self.rotate_left();
                         self.node().left.node().balance_factor = a;
                         self.node().balance_factor = b;
                     } else if lf == -1 {
-                        let (a, b) = match node.right.node().left.node().balance_factor {
+                        let (a, b) = match self.node().right.node().left.node().balance_factor {
                             1 => (-1, 0),
                             0 => (0, 0),
                             -1 => (0, 1),
                             _ => unreachable!(),
                         };
-                        node.right.rotate_right();
+                        self.node().right.rotate_right();
                         self.rotate_left();
                         self.node().left.node().balance_factor = a;
                         self.node().right.node().balance_factor = b;
