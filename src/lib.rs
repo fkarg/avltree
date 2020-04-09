@@ -1,12 +1,10 @@
-#![feature(test)]
 /// Implementation of AVL tree
+#[allow(clippy::redundant_field_names)]
 #[cfg(test)]
 extern crate quickcheck;
 #[cfg(test)]
 #[macro_use(quickcheck)]
 extern crate quickcheck_macros;
-#[cfg(test)]
-extern crate test;
 use std::borrow::Borrow;
 use std::cmp::Ordering;
 use std::cmp::Ordering::*;
@@ -205,6 +203,7 @@ where
         *self = right;
     }
 
+    #[cfg(test)]
     fn depth(&self) -> usize {
         match *self {
             Empty => 0,
@@ -216,6 +215,12 @@ where
         match *self {
             Empty => 0,
             NonEmpty(ref v) => 1 + v.left.len() + v.right.len(),
+        }
+    }
+    pub fn is_empty(&self) -> bool {
+        match *self {
+            Empty => true,
+            _ => false,
         }
     }
 
@@ -256,7 +261,7 @@ where
 }
 
 pub struct IntoIter<T> {
-    stack: Vec<Box<Node<T>>>,
+    stack: Vec<Node<T>>,
 }
 
 impl<T> IntoIter<T> {
@@ -269,7 +274,7 @@ impl<T> IntoIter<T> {
     fn traverse_left(&mut self, mut tree: AVLTree<T>) {
         while let NonEmpty(mut node) = tree {
             tree = mem::take(&mut node.left);
-            self.stack.push(node);
+            self.stack.push(*node);
         }
     }
 }
@@ -384,8 +389,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::collections::{BTreeSet, HashSet};
-    use test::Bencher;
+    use std::collections::HashSet;
 
     #[test]
     fn rotate_right() {
@@ -509,59 +513,5 @@ mod tests {
         let ri = v.binary_search(&r).unwrap_or_else(|x| x);
         let w: Vec<_> = tree.range(Some(&l), Some(&r)).collect();
         (0..(ri - li)).all(|i| v[i + li] == *w[i])
-    }
-
-    const TESTSIZE: usize = 100000;
-
-    #[bench]
-    fn bench_add_binarytree_insert(b: &mut Bencher) {
-        b.iter(|| {
-            let mut tree = Empty;
-            for i in 0..TESTSIZE {
-                tree.insert(i);
-            }
-        });
-    }
-
-    #[bench]
-    fn bench_add_btree_insert(b: &mut Bencher) {
-        b.iter(|| {
-            let mut tree = BTreeSet::new();
-            for i in 0..TESTSIZE {
-                tree.insert(i);
-            }
-        });
-    }
-
-    #[bench]
-    fn bench_add_binarytree_iter(b: &mut Bencher) {
-        let mut tree: AVLTree<_> = (0..TESTSIZE).collect();
-        b.iter(|| tree.iter());
-    }
-
-    #[bench]
-    fn bench_add_btree_iter(b: &mut Bencher) {
-        let mut tree: BTreeSet<_> = (0..TESTSIZE).collect();
-        b.iter(|| tree.iter());
-    }
-
-    #[bench]
-    fn bench_add_binarytree_index(b: &mut Bencher) {
-        let mut tree: AVLTree<_> = (0..TESTSIZE).collect();
-        b.iter(|| {
-            for v in tree.iter() {
-                tree.get(v);
-            }
-        });
-    }
-
-    #[bench]
-    fn bench_add_btree_index(b: &mut Bencher) {
-        let mut tree: BTreeSet<_> = (0..TESTSIZE).collect();
-        b.iter(|| {
-            for v in tree.iter() {
-                tree.get(v);
-            }
-        });
     }
 }
